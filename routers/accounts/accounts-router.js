@@ -30,7 +30,7 @@ router.get("/:id", validateId, (req, res) => {
       });
 });
 
-router.post('/', validateId, (req, res) => {
+router.post('/', (req, res) => {
     db('accounts')
       .insert(req.body, 'id')
       .then(ids => {
@@ -44,6 +44,23 @@ router.post('/', validateId, (req, res) => {
       });
 });
 
+router.put("/:id", validateId, (req, res) => {
+    const id = req.params.id;
+    const changes = req.body;
+
+    db('accounts')
+      .where({ id }) // remember to filter or all records will be updated (BAD PANDA!!)
+      .update(changes) // could be partial changes, only one column is enough
+      .then(count => {
+        res.status(200).json(count);
+      })
+      .catch(error => {
+        console.log(error);
+  
+        res.status(500).json({ error: "failed to update the account" });
+      });
+});
+
 // custom middleware
 
 function validateId(req, res, next) {
@@ -52,7 +69,7 @@ function validateId(req, res, next) {
     getById(id)
     .then(account => {
       console.log('account', account);
-      if( Object.keys(account).length == 0){
+      if( !Object.keys(account).length ){
         res.status(400).json({ message: "invalid account id" });
       }else next();
     })
