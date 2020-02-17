@@ -17,7 +17,7 @@ router.get('/', (req, res) => {
       });
 });
 
-router.get("/:id", (req, res) => {
+router.get("/:id", validateId, (req, res) => {
     const { id } = req.params;
 
     db('accounts').where({ id })
@@ -30,7 +30,7 @@ router.get("/:id", (req, res) => {
       });
 });
 
-router.post('/', (req, res) => {
+router.post('/', validateId, (req, res) => {
     db('accounts')
       .insert(req.body, 'id')
       .then(ids => {
@@ -43,6 +43,24 @@ router.post('/', (req, res) => {
         res.status(500).json({ error: "failed to add the account" });
       });
 });
+
+// custom middleware
+
+function validateId(req, res, next) {
+    const { id } = req.params;
+
+    getById(id)
+    .then(account => {
+      console.log('account', account);
+      if( Object.keys(account).length == 0){
+        res.status(400).json({ message: "invalid account id" });
+      }else next();
+    })
+    .catch(err => {
+      console.log(err);
+      res.status(500).json({ error: `Couldn't retrieve an account with id: ${id}` });
+    });
+}
 
 module.exports = router;
 
