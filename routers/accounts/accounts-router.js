@@ -30,4 +30,24 @@ router.get("/:id", (req, res) => {
       });
 });
 
+router.post('/', (req, res) => {
+    db('accounts')
+      .insert(req.body, 'id')
+      .then(ids => {
+        return getById(ids[0]).then(inserted => {
+          res.status(201).json(inserted[0]);
+        });
+      })
+      .catch(error => {
+        console.log(error);
+        res.status(500).json({ error: "failed to add the account" });
+      });
+});
+
 module.exports = router;
+
+function getById(id) {
+    return db('accounts')
+      .where({ id })
+      .first();
+}
