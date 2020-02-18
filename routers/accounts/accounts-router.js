@@ -4,9 +4,21 @@ const db = require("../../data/dbConfig.js");
 
 const router = express.Router();
 
+// {
+//     limit: 5,
+//     sortby: 'id',
+//     sortdir: 'desc'
+// }
+
 router.get('/', (req, res) => {
+    console.log('req.query', req.query);
+    const limit = req.query.limit;
+    const sortby = req.query.sortby;
+    const dir = req.query.sortdir
+
     db('*')
       .from("accounts")
+      .limit(limit).orderBy(sortby, dir)
       .then(accounts => {
         res.status(200).json(accounts);
       })
